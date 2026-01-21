@@ -1,0 +1,9 @@
+llm:
+  provider: "groq"
+  model: "moonshotai/kimi-k2-instruct" # "openai/gpt-oss-120b" # "qwen/qwen3-32b"
+  # api_key: ""
+  # base_url: null  # Optional custom base URL
+
+app:
+  throttling_delay: 3.0 # Seconds to wait between topics
+  db_path: "research.db"

@@ -6,4 +6,4 @@ llm:
 
 app:
   throttling_delay: 3.0 # Seconds to wait between topics
-  db_path: "research.db"
+  db_path: "papers.db"

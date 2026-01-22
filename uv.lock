@@ -38,6 +38,53 @@ wheels = [
 ]
 
 [[package]]
+name = "arxiv-scanner"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "arxiv" },
+    { name = "groq" },
+    { name = "jinja2" },
+    { name = "openai" },
+    { name = "pydantic" },
+    { name = "pydantic-settings" },
+    { name = "python-dotenv" },
+    { name = "pyyaml" },
+    { name = "requests" },
+    { name = "rich" },
+    { name = "semanticscholar" },
+    { name = "sqlalchemy" },
+    { name = "tenacity" },
+    { name = "typer" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "arxiv-scanner" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "arxiv", specifier = ">=2.4.0" },
+    { name = "groq", specifier = ">=1.0.0" },
+    { name = "jinja2", specifier = ">=3.1.6" },
+    { name = "openai", specifier = ">=2.15.0" },
+    { name = "pydantic", specifier = ">=2.12.5" },
+    { name = "pydantic-settings", specifier = ">=2.12.0" },
+    { name = "python-dotenv", specifier = ">=1.2.1" },
+    { name = "pyyaml", specifier = ">=6.0.3" },
+    { name = "requests", specifier = ">=2.32.5" },
+    { name = "rich", specifier = ">=14.2.0" },
+    { name = "semanticscholar", specifier = ">=0.11.0" },
+    { name = "sqlalchemy", specifier = ">=2.0.45" },
+    { name = "tenacity", specifier = ">=9.1.2" },
+    { name = "typer", specifier = ">=0.21.1" },
+]
+
+[package.metadata.requires-dev]
+dev = [{ name = "arxiv-scanner", editable = "." }]
+
+[[package]]
 name = "certifi"
 version = "2026.1.4"
 source = { registry = "https://pypi.org/simple" }
@@ -408,6 +455,15 @@ wheels = [
 ]
 
 [[package]]
+name = "nest-asyncio"
+version = "1.6.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/83/f8/51569ac65d696c8ecbee95938f89d4abf00f47d58d48f6fbabfe8f0baefe/nest_asyncio-1.6.0.tar.gz", hash = "sha256:6f172d5449aca15afd6c646851f4e31e02c598d553a667e38cafa997cfec55fe", size = 7418 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a0/c4/c2971a3ba4c6103a3d10c4b0f24f461ddc027f0f09763220cf35ca1401b3/nest_asyncio-1.6.0-py3-none-any.whl", hash = "sha256:87af6efd6b5e897c81050477ef65c62e2b2f35d51703cae01aff2905b1852e1c", size = 5195 },
+]
+
+[[package]]
 name = "openai"
 version = "2.15.0"
 source = { registry = "https://pypi.org/simple" }
@@ -602,51 +658,6 @@ wheels = [
 ]
 
 [[package]]
-name = "research-digest"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "arxiv" },
-    { name = "groq" },
-    { name = "jinja2" },
-    { name = "openai" },
-    { name = "pydantic" },
-    { name = "pydantic-settings" },
-    { name = "python-dotenv" },
-    { name = "pyyaml" },
-    { name = "requests" },
-    { name = "rich" },
-    { name = "sqlalchemy" },
-    { name = "tenacity" },
-    { name = "typer" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "research-digest" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "arxiv", specifier = ">=2.4.0" },
-    { name = "groq", specifier = ">=1.0.0" },
-    { name = "jinja2", specifier = ">=3.1.6" },
-    { name = "openai", specifier = ">=2.15.0" },
-    { name = "pydantic", specifier = ">=2.12.5" },
-    { name = "pydantic-settings", specifier = ">=2.12.0" },
-    { name = "python-dotenv", specifier = ">=1.2.1" },
-    { name = "pyyaml", specifier = ">=6.0.3" },
-    { name = "requests", specifier = ">=2.32.5" },
-    { name = "rich", specifier = ">=14.2.0" },
-    { name = "sqlalchemy", specifier = ">=2.0.45" },
-    { name = "tenacity", specifier = ">=9.1.2" },
-    { name = "typer", specifier = ">=0.21.1" },
-]
-
-[package.metadata.requires-dev]
-dev = [{ name = "research-digest", editable = "." }]
-
-[[package]]
 name = "rich"
 version = "14.2.0"
 source = { registry = "https://pypi.org/simple" }
@@ -657,6 +668,20 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/fb/d2/8920e102050a0de7bfabeb4c4614a49248cf8d5d7a8d01885fbb24dc767a/rich-14.2.0.tar.gz", hash = "sha256:73ff50c7c0c1c77c8243079283f4edb376f0f6442433aecb8ce7e6d0b92d1fe4", size = 219990 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/25/7a/b0178788f8dc6cafce37a212c99565fa1fe7872c70c6c9c1e1a372d9d88f/rich-14.2.0-py3-none-any.whl", hash = "sha256:76bc51fe2e57d2b1be1f96c524b890b816e334ab4c1e45888799bfaab0021edd", size = 243393 },
+]
+
+[[package]]
+name = "semanticscholar"
+version = "0.11.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "httpx" },
+    { name = "nest-asyncio" },
+    { name = "tenacity" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/8a/5c/18302aad8f094b3e4b8bb79ee82dd0fafceee7811f9844c41f393f8a0e5f/semanticscholar-0.11.0.tar.gz", hash = "sha256:91e1233aedbf8e290daf8556fc7a3a6a6db78fe833adee88fd99ddb0a07a0c17", size = 28283 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/7e/af/0627cf6bb64054d03a1fe8e9b0e659b496794000c30ba4fb921ca8aef20a/semanticscholar-0.11.0-py3-none-any.whl", hash = "sha256:824b7c3d11237ec829a211480ed1ed05f4ee9dfdf03e226b04c3d2051ea19b6e", size = 26048 },
 ]
 
 [[package]]

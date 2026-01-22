@@ -3,7 +3,7 @@
 import arxiv
 from tenacity import retry, stop_after_attempt, retry_if_exception_type
 
-from research_digest.llm.provider import LLMProvider
+from arxiv_scanner.llm.provider import LLMProvider
 
 
 class QueryValidationError(Exception):

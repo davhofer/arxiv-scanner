@@ -6,6 +6,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 
+
 class Storage:
     def __init__(self, db_path: str):
         self.db_path = db_path
@@ -60,7 +61,7 @@ class Storage:
         with self._get_conn() as conn:
             cursor = conn.execute(
                 "INSERT INTO topics (name, description, query) VALUES (?, ?, ?)",
-                (name, description, query)
+                (name, description, query),
             )
             return cursor.lastrowid
 
@@ -73,64 +74,82 @@ class Storage:
 
     def get_topic(self, topic_id: int) -> Optional[Dict[str, Any]]:
         with self._get_conn() as conn:
-            row = conn.execute("SELECT * FROM topics WHERE id = ?", (topic_id,)).fetchone()
+            row = conn.execute(
+                "SELECT * FROM topics WHERE id = ?", (topic_id,)
+            ).fetchone()
             return dict(row) if row else None
 
     def update_topic_last_run(self, topic_id: int):
         with self._get_conn() as conn:
             conn.execute(
                 "UPDATE topics SET last_run_at = ? WHERE id = ?",
-                (datetime.utcnow().isoformat(), topic_id)
+                (datetime.utcnow().isoformat(), topic_id),
             )
 
     def save_paper(self, paper: Dict[str, Any]):
         with self._get_conn() as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 INSERT OR IGNORE INTO papers (id, title, authors, published_at, abstract, url)
                 VALUES (?, ?, ?, ?, ?, ?)
-            """, (
-                paper['id'], paper['title'], json.dumps(paper['authors']),
-                paper['published_at'], paper['abstract'], paper['url']
-            ))
+            """,
+                (
+                    paper["id"],
+                    paper["title"],
+                    json.dumps(paper["authors"]),
+                    paper["published_at"],
+                    paper["abstract"],
+                    paper["url"],
+                ),
+            )
 
-    def save_paper_topic_link(self, paper_id: str, topic_id: int, result: Dict[str, Any]):
+    def save_paper_topic_link(
+        self, paper_id: str, topic_id: int, result: Dict[str, Any]
+    ):
         with self._get_conn() as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 INSERT OR REPLACE INTO paper_topics 
                 (paper_id, topic_id, relevance_score, is_relevant, reasoning, summary, tags)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
-            """, (
-                paper_id, topic_id, 
-                result.get('relevance_score'),
-                1 if result.get('is_relevant') else 0,
-                result.get('reasoning'),
-                json.dumps(result.get('summary')),
-                json.dumps(result.get('summary', {}).get('tags', []))
-            ))
+            """,
+                (
+                    paper_id,
+                    topic_id,
+                    result.get("relevance_score"),
+                    1 if result.get("is_relevant") else 0,
+                    result.get("reasoning"),
+                    json.dumps(result.get("summary")),
+                    json.dumps(result.get("summary", {}).get("tags", [])),
+                ),
+            )
 
     def get_paper_topic_link(self, paper_id: str, topic_id: int):
         with self._get_conn() as conn:
             row = conn.execute(
                 "SELECT * FROM paper_topics WHERE paper_id = ? AND topic_id = ?",
-                (paper_id, topic_id)
+                (paper_id, topic_id),
             ).fetchone()
             return dict(row) if row else None
 
     def get_relevant_papers(self, topic_id: int) -> List[Dict[str, Any]]:
         with self._get_conn() as conn:
-            rows = conn.execute("""
+            rows = conn.execute(
+                """
                 SELECT p.*, pt.relevance_score, pt.reasoning, pt.summary, pt.tags
                 FROM papers p
                 JOIN paper_topics pt ON p.id = pt.paper_id
                 WHERE pt.topic_id = ? AND pt.is_relevant = 1
                 ORDER BY p.published_at DESC
-            """, (topic_id,)).fetchall()
-            
+            """,
+                (topic_id,),
+            ).fetchall()
+
             results = []
             for row in rows:
                 d = dict(row)
-                d['authors'] = json.loads(d['authors'])
-                d['summary'] = json.loads(d['summary']) if d['summary'] else {}
-                d['tags'] = json.loads(d['tags']) if d['tags'] else []
+                d["authors"] = json.loads(d["authors"])
+                d["summary"] = json.loads(d["summary"]) if d["summary"] else {}
+                d["tags"] = json.loads(d["tags"]) if d["tags"] else []
                 results.append(d)
             return results

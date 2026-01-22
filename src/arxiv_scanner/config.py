@@ -65,4 +65,3 @@ class Config(BaseModel):
             raise ImportError("PyYAML is required to load config from YAML file")
         except Exception as e:
             raise ValueError(f"Failed to load config from {config_path}: {e}")
-

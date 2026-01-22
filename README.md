@@ -1,1 +1,1 @@
-# research-digest
+# arxiv-scanner

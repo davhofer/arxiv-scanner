@@ -9,6 +9,8 @@ import openai
 from openai import OpenAI
 from groq import Groq
 
+from research_digest.llm.rate_limiter import RateLimiter, RateLimitedLLMProvider
+
 
 class LLMProvider(ABC):
     """Abstract base class for LLM providers."""
@@ -104,12 +106,13 @@ class OllamaProvider(LLMProvider):
             raise RuntimeError(f"Ollama API error: {e}")
 
 
-def create_llm_provider(config) -> LLMProvider:
+def create_llm_provider(config):
     """Factory function to create LLM provider based on config."""
+    # Create the base provider
     if config.llm.provider.lower() == "openai":
         if not config.llm.api_key:
             raise ValueError("OpenAI API key is required")
-        return OpenAIProvider(
+        base_provider = OpenAIProvider(
             api_key=config.llm.api_key,
             model=config.llm.model,
             base_url=config.llm.base_url,
@@ -118,14 +121,26 @@ def create_llm_provider(config) -> LLMProvider:
         api_key = config.llm.api_key or os.environ.get("GROQ_API_KEY")
         if not api_key:
             raise ValueError("Groq API key is required")
-        return GroqProvider(
+        base_provider = GroqProvider(
             api_key=api_key,
             model=config.llm.model or "llama-3.3-70b-versatile",
         )
     elif config.llm.provider.lower() == "ollama":
-        return OllamaProvider(
+        base_provider = OllamaProvider(
             model=config.llm.model,
             base_url=config.llm.base_url or "http://localhost:11434",
         )
     else:
         raise ValueError(f"Unsupported LLM provider: {config.llm.provider}")
+    
+    # Apply rate limiting if enabled
+    if config.app.rate_limit.enabled:
+        rate_limiter = RateLimiter(max_requests_per_minute=config.app.rate_limit.max_requests_per_minute)
+        return RateLimitedLLMProvider(
+            base_provider, 
+            rate_limiter,
+            enable_backoff=config.app.rate_limit.enable_backoff,
+            max_backoff_time=config.app.rate_limit.max_backoff_time
+        )
+    else:
+        return base_provider

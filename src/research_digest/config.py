@@ -15,9 +15,17 @@ class LLMConfig(BaseModel):
     base_url: Optional[str] = Field(default=None, description="Custom base URL for provider")
 
 
+class RateLimitConfig(BaseModel):
+    enabled: bool = Field(default=True, description="Enable intelligent rate limiting")
+    max_requests_per_minute: float = Field(default=20.0, description="Maximum LLM requests per minute")
+    enable_backoff: bool = Field(default=True, description="Enable exponential backoff for rate limit errors")
+    max_backoff_time: float = Field(default=60.0, description="Maximum backoff time in seconds")
+
+
 class AppConfig(BaseModel):
-    throttling_delay: float = Field(default=3.0, description="Seconds to wait between topics")
+    throttling_delay: float = Field(default=3.0, description="Seconds to wait between topics (deprecated, use rate_limiting)")
     db_path: str = Field(default="research.db", description="Path to SQLite database")
+    rate_limit: RateLimitConfig = Field(default_factory=RateLimitConfig)
 
 
 class Config(BaseSettings):

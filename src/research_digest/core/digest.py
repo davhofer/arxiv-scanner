@@ -28,7 +28,7 @@ Keep summaries concise but informative. Focus on what makes this paper unique or
 def summarize_paper(
     paper_title: str,
     paper_abstract: str,
-    llm_provider: LLMProvider
+    llm_provider
 ) -> Dict[str, Any]:
     """Generate a summary of a paper.
     

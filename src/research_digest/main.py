@@ -11,6 +11,7 @@ from typing import Optional
 from research_digest.config import Config
 from research_digest.database import Database
 from research_digest.llm.provider import create_llm_provider
+from research_digest.llm.rate_limiter import RateLimitError
 from research_digest.core.translate import translate_topic
 from research_digest.core.ingest import fetch_papers
 from research_digest.core.filter import filter_paper
@@ -138,9 +139,19 @@ def update(
     force: bool = typer.Option(
         False, "--force", "-f", help="Force reprocessing of all papers (ignore cache)"
     ),
+    max_requests_per_minute: Optional[float] = typer.Option(
+        None, "--max-requests-per-minute", help="Override rate limit: max LLM requests per minute"
+    ),
 ):
     """Main update loop to fetch and process new papers."""
     config, llm_provider = get_config_and_llm()
+    
+    # Override rate limit config if specified
+    if max_requests_per_minute:
+        config.app.rate_limit.max_requests_per_minute = max_requests_per_minute
+        # Recreate provider with new rate limit
+        llm_provider = create_llm_provider(config)
+    
     db = get_database()
 
     # Ensure tables exist
@@ -265,6 +276,14 @@ def update(
                             processed_count += 1
                             progress.update(paper_progress, advance=1)
 
+                        except RateLimitError as e:
+                            if not quiet:
+                                console.print(f"[yellow]Rate limit hit[/yellow]: {e.message}")
+                                if e.retry_after:
+                                    console.print(f"[dim]Will retry after {e.retry_after:.1f}s...[/dim]")
+                            # For rate limit errors, we retry automatically in the rate limiter
+                            # so we should continue processing
+                            progress.update(paper_progress, advance=1)
                         except Exception as e:
                             if not quiet:
                                 console.print(
@@ -307,8 +326,12 @@ def status(
     reset_topic: Optional[int] = typer.Option(
         None, "--reset-topic", help="Reset a specific topic ID (clear last_run_at)"
     ),
+    show_rate_limit: bool = typer.Option(
+        False, "--rate-limit", "-r", help="Show rate limiting statistics"
+    ),
 ):
     """Show database status and optionally reset topics."""
+    config, llm_provider = get_config_and_llm()
     db = get_database()
     
     with db.get_session_context() as session:
@@ -346,6 +369,33 @@ def status(
                 console.print(f"    Papers: {relevant_count}/{paper_count} relevant")
                 console.print(f"    Query: {topic.raw_query[:80]}...")
                 console.print("")
+        
+        # Show rate limiting statistics
+        if show_rate_limit:
+            console.print(f"\n[bold blue]Rate Limiting Status[/bold blue]")
+            console.print("=" * 40)
+            
+            if config.app.rate_limit.enabled:
+                console.print(f"Rate limiting: [green]Enabled[/green]")
+                console.print(f"Max requests per minute: {config.app.rate_limit.max_requests_per_minute}")
+                
+                # Try to get stats from rate-limited provider
+                try:
+                    from research_digest.llm.rate_limiter import RateLimitedLLMProvider
+                    if isinstance(llm_provider, RateLimitedLLMProvider):
+                        stats = llm_provider.get_stats()
+                        console.print(f"Requests in last minute: {stats['requests_in_last_minute']}")
+                        console.print(f"Remaining requests: {stats['remaining_requests']}")
+                        console.print(f"Total requests made: {stats['total_requests']}")
+                        console.print(f"Rate limit errors: {stats['rate_limit_errors']}")
+                        if stats['error_rate'] > 0:
+                            console.print(f"Error rate: [yellow]{stats['error_rate']:.1%}[/yellow]")
+                        else:
+                            console.print(f"Error rate: [green]{stats['error_rate']:.1%}[/green]")
+                except Exception as e:
+                    console.print(f"[dim]Could not fetch rate limit stats: {e}[/dim]")
+            else:
+                console.print(f"Rate limiting: [red]Disabled[/red]")
         
         # Handle reset
         if reset_topic:
@@ -441,9 +491,19 @@ def digest_report(
     force_regenerate: bool = typer.Option(
         False, "--force", "-f", help="Force regeneration of all digests (reprocess all relevant papers)"
     ),
+    max_requests_per_minute: Optional[float] = typer.Option(
+        None, "--max-requests-per-minute", help="Override rate limit: max LLM requests per minute"
+    ),
 ):
     """Generate a digest report for one or all topics."""
     config, llm_provider = get_config_and_llm()
+    
+    # Override rate limit config if specified
+    if max_requests_per_minute:
+        config.app.rate_limit.max_requests_per_minute = max_requests_per_minute
+        # Recreate provider with new rate limit
+        llm_provider = create_llm_provider(config)
+    
     db = get_database()
 
     with db.get_session_context() as session:

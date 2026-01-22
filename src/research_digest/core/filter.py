@@ -36,7 +36,7 @@ def filter_paper(
     paper_title: str,
     paper_abstract: str,
     topic_description: str,
-    llm_provider: LLMProvider
+    llm_provider
 ) -> Dict[str, Any]:
     """Determine if a paper is relevant to a research topic.
     

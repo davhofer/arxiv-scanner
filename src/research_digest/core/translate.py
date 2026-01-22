@@ -53,7 +53,7 @@ def generate_valid_query(topic_description: str, llm_provider: LLMProvider) -> s
     return raw_query.strip()
 
 
-def translate_topic(topic_description: str, llm_provider: LLMProvider) -> str:
+def translate_topic(topic_description: str, llm_provider) -> str:
     """Translate a natural language topic description into a validated arXiv query."""
     return generate_valid_query(topic_description, llm_provider)
 
